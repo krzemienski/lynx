@@ -1,0 +1,14 @@
+  ╭───────────────────────────────────────────────────────╮
+  │   ▲                                                   │
+  │   ◐    l y n x                                        │
+  │   ▼                                                   │
+  ╰───────────────────────────────────────────────────────╯
+
+  sharp-eyed visual-audit suite for Claude Code
+  ─────────────────────────────────────────────
+  full-ui-experience-audit  ·  app-wide audit-and-remediate loop
+  ui-experience-audit       ·  per-screen deep audit
+  ─────────────────────────────────────────────
+  WCAG 2.2 AA · APCA · NIELSEN · iOS HIG · NO MOCKS
+  9/9 detection on known-mole synthetic
+  v1.0.0 · MIT · github.com/krzemienski/lynx

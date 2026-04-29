@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="lynx — sharp-eyed visual audit (dark variant)">
+  <style>svg{color:#f5f5f5}</style>
+  <path d="M 24 128 C 64 56, 192 56, 232 128 C 192 200, 64 200, 24 128 Z"
+        fill="none" stroke="currentColor" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="128" cy="128" r="56" fill="currentColor"/>
+  <rect x="120" y="80" width="16" height="96" rx="8" ry="8" fill="#0a0a0a"/>
+  <circle cx="142" cy="106" r="4" fill="#0a0a0a"/>
+  <rect x="125" y="20"  width="6" height="14" rx="2" fill="currentColor"/>
+  <rect x="125" y="222" width="6" height="14" rx="2" fill="currentColor"/>
+  <rect x="20"  y="125" width="14" height="6" rx="2" fill="currentColor"/>
+  <rect x="222" y="125" width="14" height="6" rx="2" fill="currentColor"/>
+  <path d="M 128 4 L 122 26 L 134 26 Z" fill="currentColor"/>
+</svg>

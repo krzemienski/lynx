@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>synth-2 — after cycle-1 fixes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #fafafa;
+      color: #222;
+    }
+    main {
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    h1 { margin-top: 0; }
+    section { margin: 2rem 0; padding: 1.5rem; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; }
+    h2 { margin-top: 0; font-size: 1.2rem; color: #333; }
+
+    dialog#trap-modal::backdrop { background: rgba(0,0,0,0.5); }
+    dialog#trap-modal { padding: 2rem; border: 1px solid #999; border-radius: 8px; }
+
+    .error-msg {
+      color: #a01818;
+      background: #fff5f5;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #d4a0a0;
+    }
+
+    .caption {
+      font-size: 11px;
+      color: #666;
+    }
+
+    a.detail-link {
+      color: #06f;
+      text-decoration: underline;
+    }
+
+    label.field {
+      display: block;
+      margin: 8px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    label.field input {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>synth-2</h1>
+    <p>lynx shakedown synthetic #2 — after cycle-1 fixes (D1, D2, D3, D5 patched; D4 below threshold).</p>
+
+    <section>
+      <h2>Sign up</h2>
+      <form>
+        <label class="field" for="signup-email">Email address
+          <input id="signup-email" type="email">
+        </label>
+        <label class="field" for="signup-password">Password
+          <input id="signup-password" type="password">
+        </label>
+        <button type="submit" style="margin-top:8px;padding:8px 16px;background:#06f;color:#fff;border:none;border-radius:4px;">Continue</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Recent activity</h2>
+      <p class="error-msg" role="alert">⚠ Connection failed. Retry below.</p>
+      <p class="caption">Last sync 14:32 UTC. Cached for 60 seconds.</p>
+      <p>Status: <a class="detail-link" href="/log">View detailed log</a></p>
+    </section>
+
+    <section>
+      <h2>Trapped modal demo</h2>
+      <button id="open-trap" type="button" style="padding:8px 16px;background:#444;color:#fff;border:none;border-radius:4px;">Open modal</button>
+      <dialog id="trap-modal">
+        <h3 style="margin-top:0;">Modal demo</h3>
+        <p>This modal can be closed via the button below or by pressing Esc.</p>
+        <button type="button" id="close-trap" style="margin-top:8px;padding:8px 16px;background:#444;color:#fff;border:none;border-radius:4px;">Close</button>
+      </dialog>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('open-trap').addEventListener('click', () => {
+      document.getElementById('trap-modal').showModal();
+    });
+    document.getElementById('close-trap').addEventListener('click', () => {
+      document.getElementById('trap-modal').close();
+    });
+  </script>
+</body>
+</html>

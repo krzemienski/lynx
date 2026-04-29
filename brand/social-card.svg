@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="lynx — sharp-eyed visual audit suite for Claude Code">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="65%">
+      <stop offset="0%"  stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a07a1f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <g stroke="#f5f5f5" stroke-width="1" opacity="0.06">
+    <line x1="640" y1="0"   x2="640" y2="640"/>
+    <line x1="0"   y1="320" x2="1280" y2="320"/>
+  </g>
+
+  <g transform="translate(96 192)">
+    <path d="M 24 128 C 64 56, 192 56, 232 128 C 192 200, 64 200, 24 128 Z"
+          fill="none" stroke="url(#accent)" stroke-width="10" stroke-linejoin="round"/>
+    <circle cx="128" cy="128" r="56" fill="url(#accent)"/>
+    <rect x="120" y="80" width="16" height="96" rx="8" ry="8" fill="#0a0a0a"/>
+    <circle cx="142" cy="106" r="4" fill="#0a0a0a"/>
+    <rect x="125" y="20"  width="6" height="14" rx="2" fill="url(#accent)"/>
+    <rect x="125" y="222" width="6" height="14" rx="2" fill="url(#accent)"/>
+    <rect x="20"  y="125" width="14" height="6" rx="2" fill="url(#accent)"/>
+    <rect x="222" y="125" width="14" height="6" rx="2" fill="url(#accent)"/>
+    <path d="M 128 4 L 122 26 L 134 26 Z" fill="url(#accent)"/>
+  </g>
+
+  <g font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace" fill="#f5f5f5">
+    <text x="416" y="316" font-size="156" font-weight="700" letter-spacing="-6">lynx</text>
+    <rect x="416" y="332" width="320" height="6" fill="url(#accent)"/>
+    <text x="416" y="396" font-size="32" font-weight="400" fill="#d4d4d4" letter-spacing="0.5">
+      sharp-eyed visual-audit suite
+    </text>
+    <text x="416" y="448" font-size="20" fill="#9a9a9a" letter-spacing="1.4">
+      WCAG 2.2 AA · APCA · NIELSEN · iOS HIG · NO MOCKS
+    </text>
+    <text x="416" y="528" font-size="20" fill="#7a7a7a">
+      /plugin marketplace add krzemienski/lynx
+    </text>
+    <text x="416" y="556" font-size="18" fill="#5a5a5a">
+      github.com/krzemienski/lynx · v1.0.0 · MIT
+    </text>
+  </g>
+
+  <g transform="translate(1056 528)" font-family="ui-monospace, monospace" fill="url(#accent)">
+    <rect x="0" y="-44" width="160" height="68" fill="none" stroke="url(#accent)" stroke-width="2" rx="4"/>
+    <text x="80" y="-12" text-anchor="middle" font-size="14" letter-spacing="2" fill="#9a9a9a">DETECTION</text>
+    <text x="80" y="14"  text-anchor="middle" font-size="32" font-weight="700">9 / 9</text>
+  </g>
+</svg>
