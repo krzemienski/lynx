@@ -1,0 +1,50 @@
+  - deepest-plan:accessibility-audit
+
+  validationforge plugin:
+  - validationforge:validate-audit
+  - validationforge:validate-audit-benchmarks
+  - validationforge:full-functional-audit
+  - validationforge:accessibility-audit
+  - validationforge:design-token-audit
+  - validationforge:production-readiness-audit
+
+  everything-claude-code plugin:
+  - everything-claude-code:workspace-surface-audit
+  - everything-claude-code:click-path-audit
+  - everything-claude-code:ecc-tools-cost-audit
+  - everything-claude-code:automation-audit-ops
+
+  top-level / standalone (no plugin prefix):
+  - full-ui-experience-audit
+  - ui-experience-audit
+  - full-functional-audit
+  - audit-codebase
+  - accessibility-audit (via deepest-plan/validationforge namespaces above)
+
+  oh-my-claudecode plugin:
+  - oh-my-claudecode:ai-slop-cleaner (description mentions audit-style cleanup)
+
+  crucible plugin:
+  - crucible:audit
+  - crucible:session-log-audit
+
+  taches-cc-resources plugin:
+  - taches-cc-resources:audit-subagent
+  - taches-cc-resources:audit-skill
+  - taches-cc-resources:audit-slash-command
+
+  validationforge (additional):
+  - validationforge:retrospective-validation (audit-adjacent)
+
+  plugin-dev / skill audits:
+  - skill audit tooling lives under taches-cc-resources above.
+
+  No audit run. List only.
+
+✻ Cooked for 18s
+                                                                                                                                                                                          240597 tokens
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  [Opus 4.7 (1M context)] ██░░░░░░░░ 24% | tmp | tok: 241k (in: 6, out: 918) | ⏱️  2m
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

@@ -147,6 +147,7 @@ lynx/
 ├── shakedowns/              # real-target audit corpus (WAM + synth-2 = 14/14)
 │   └── synth-2/             # 5-defect single-screen synthetic
 ├── marketplace-submissions/ # issue/PR templates for cross-listing
+├── install-evidence/        # live tmux-driven install verification
 ├── README.md (this file)
 └── LICENSE
 ```
