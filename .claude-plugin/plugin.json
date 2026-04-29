@@ -1,0 +1,24 @@
+{
+  "name": "lynx",
+  "version": "1.0.0",
+  "description": "Lynx is a sharp-eyed visual-audit suite for Claude Code. Two coupled skills — full-app audit-and-remediate loop + per-screen deep audit — catch defects through real-system probes (contrast failures, false affordances, modal opacity, latent contract mismatches). No mocks, no test files, evidence-cited verdicts. 9/9 detection accuracy on a known-mole synthetic.",
+  "author": {
+    "name": "Nick Krzemienski"
+  },
+  "license": "MIT",
+  "keywords": [
+    "audit",
+    "ui",
+    "ux",
+    "design",
+    "accessibility",
+    "wcag",
+    "apca",
+    "nielsen",
+    "agent-browser",
+    "ios",
+    "web",
+    "fullstack"
+  ],
+  "skills": ["./skills/"]
+}

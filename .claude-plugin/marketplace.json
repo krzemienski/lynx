@@ -1,0 +1,17 @@
+{
+  "name": "lynx-dev",
+  "owner": {
+    "name": "Nick Krzemienski"
+  },
+  "plugins": [
+    {
+      "name": "lynx",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "Sharp-eyed visual-audit suite for Claude Code — two coupled skills find UI/UX defects through real-system probes. No mocks.",
+      "category": "design",
+      "tags": ["audit", "ui", "ux", "accessibility", "wcag", "apca", "nielsen", "saliency", "lynx"],
+      "license": "MIT"
+    }
+  ]
+}
