@@ -7,10 +7,11 @@
     {
       "name": "lynx",
       "source": "./",
-      "version": "1.0.0",
-      "description": "Sharp-eyed visual-audit suite for Claude Code — two coupled skills find UI/UX defects through real-system probes. No mocks.",
+      "version": "1.1.0",
+      "description": "Sharp-eyed visual-audit suite for Claude Code. Two coupled skills catch real UI defects — contrast failures, false affordances, modal opacity, contract mismatches — via real-system probes, zero mocks, evidence-cited verdicts.",
       "category": "design",
       "tags": ["audit", "ui", "ux", "accessibility", "wcag", "apca", "nielsen", "saliency", "lynx"],
+      "keywords": ["audit", "ui-defects", "evidence-gated", "claude-code-plugin", "lynx"],
       "license": "MIT"
     }
   ]
