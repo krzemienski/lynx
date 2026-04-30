@@ -1,39 +1,43 @@
 {
-  "hooks": [
-    {
-      "name": "block-test-files",
-      "description": "Block creation of test/mock/stub files. lynx Iron Rule: no test frameworks.",
-      "event": "PreToolUse",
-      "matcher": "Write|Edit|MultiEdit",
-      "command": "node hooks/block-test-files.js"
-    },
-    {
-      "name": "mock-detection",
-      "description": "Detect mock/stub patterns in code being written. Hard-blocks on match.",
-      "event": "PreToolUse",
-      "matcher": "Write|Edit|MultiEdit",
-      "command": "node hooks/mock-detection.js"
-    },
-    {
-      "name": "validation-not-compilation",
-      "description": "Remind that build success is NOT validation. Fires after successful builds.",
-      "event": "PostToolUse",
-      "matcher": "Bash",
-      "command": "node hooks/validation-not-compilation.js"
-    },
-    {
-      "name": "evidence-gate-reminder",
-      "description": "Inject evidence checklist when marking a task/todo complete.",
-      "event": "PreToolUse",
-      "matcher": "TodoWrite|TaskUpdate",
-      "command": "node hooks/evidence-gate-reminder.js"
-    },
-    {
-      "name": "completion-claim-validator",
-      "description": "Block completion claims that lack fresh validation evidence in e2e-evidence/.",
-      "event": "PostToolUse",
-      "matcher": "Bash",
-      "command": "node hooks/completion-claim-validator.js"
-    }
-  ]
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/block-test-files.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/mock-detection.js\""
+          }
+        ]
+      },
+      {
+        "matcher": "TodoWrite|TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/evidence-gate-reminder.js\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/validation-not-compilation.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/completion-claim-validator.js\""
+          }
+        ]
+      }
+    ]
+  }
 }

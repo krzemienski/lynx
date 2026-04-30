@@ -4,6 +4,47 @@ All notable changes to the lynx plugin are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-04-30 — Manifest Schema Fix
+
+**Patch release.** Fixes plugin manifest validation failure that prevented installation
+under recent Claude Code releases. No skill or audit-pipeline behavior changes.
+
+### Fixed
+
+- **`.claude-plugin/plugin.json`** — removed string-typed asset fields (`skills`,
+  `commands`, `hooks`, `agents`) that triggered `agents: Invalid input` validator
+  errors. Components are now auto-discovered from their standard directories
+  (`skills/`, `commands/`, `hooks/`, `agents/`), matching the official greeter and
+  full-featured plugin examples and aligning with `validationforge` /
+  `superpowers-developing-for-claude-code` patterns. Adds `homepage`, `repository`,
+  and `author.url` for marketplace metadata completeness.
+- **`hooks/hooks.json`** — converted from a flat `{name,event,matcher,command}`
+  array (which Claude Code's hooks loader rejects) to the canonical event-keyed
+  schema documented at
+  `references/plugin-structure.md:218-249`:
+  `{"hooks": {"<EventName>": [{"matcher": "<re>", "hooks": [{"type": "command",
+  "command": "..."}]}]}}`. All five hook commands now use `${CLAUDE_PLUGIN_ROOT}`
+  so they resolve from the plugin install dir instead of the user's CWD.
+- **`.claude-plugin/marketplace.json`** — version bumped to 1.1.1.
+
+### Why this happened
+
+The 1.1.0 manifest was carried over from an older internal plugin draft that
+predated the current `plugin.json` schema. The old form embedded asset directory
+paths as strings; the current schema only accepts arrays of file paths (per
+`episodic-memory@1.0.15`) or relies on auto-discovery (per the official greeter).
+Strict validation in newer Claude Code releases surfaces the mismatch as
+`agents: Invalid input`. The fix is purely structural — the underlying hooks,
+commands, agents, and skills are unchanged.
+
+### Frozen invariants (unchanged from 1.1.0)
+
+- `full-ui-experience-audit` and `ui-experience-audit` skills remain at 14/14
+  detection across WAM 9/9 + synth-2 5/5. **No skill content was modified.**
+- Cycle cap = 2. WAM-class needs cycle-2 reach; synth-2-class needs cycle-1.
+- Iron Rule (RL-1): no mocks, no fixtures, no test files in audits.
+- RL-2: every PASS verdict must cite a specific evidence file path.
+
 ## [1.1.0] — 2026-04-29 — Plugin Surface Expansion
 
 Brings lynx to feature-parity with sibling evidence-gated plugins (anneal, crucible, validationforge). The two existing skills (`full-ui-experience-audit` and `ui-experience-audit`) are **frozen** — their 14/14 detection accuracy across two synthetic shakedowns (WAM 9/9 + synth-2 5/5) remains the load-bearing empirical claim. v1.1 ships the surrounding apparatus that makes those skills production-grade and discoverable: hooks, slash commands, a sub-agent, install/uninstall scripts, and the planning artifacts required for a public site rollout.
