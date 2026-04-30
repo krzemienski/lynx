@@ -1,0 +1,12 @@
+---
+title: Verdict-writer agent
+description: The sole lynx sub-agent — refuses PASS without cited evidence
+---
+
+## verdict-writer
+
+Read-only sub-agent (Read, Glob, Grep, Bash). Walks per-screen findings under `e2e-evidence/<run-id>/<screen-id>/`, emits per-screen `verdict.md` plus aggregate `run-verdict.md`.
+
+**Refuses to emit overall PASS without ≥1 cited evidence file path** — literal RL-2 cite-or-refuse. This is the single point in the lynx pipeline that can BLOCK a ship; it does so by default unless the evidence chain is clean.
+
+Source: [`agents/verdict-writer.md`](https://github.com/krzemienski/lynx/blob/main/agents/verdict-writer.md)

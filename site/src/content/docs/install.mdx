@@ -1,0 +1,314 @@
+---
+title: Install
+description: Install lynx into Claude Code
+---
+
+Lynx is a Claude Code plugin that brings UI/UX audit skills (`/validate`, `/validate-plan`,
+`/validate-audit`, `/validate-fix`, `/validate-ci`, `/lynx-setup`) into every Claude Code session.
+
+---
+
+## Prerequisites
+
+| Tool | Minimum version | Why |
+|------|----------------|-----|
+| `git` | any recent | clone the plugin repo |
+| `python3` | 3.8+ | update `installed_plugins.json` during install/uninstall |
+| Claude Code | latest | plugin host |
+
+Verify:
+
+```bash
+git --version
+python3 --version
+```
+
+---
+
+## Install Paths
+
+### Path 1 — curl one-liner (recommended)
+
+Paste and run in any terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/krzemienski/lynx/main/install.sh | bash
+```
+
+The script will:
+1. Clone the repo to `~/.claude/plugins/lynx/` (or `$LYNX_INSTALL_DIR`)
+2. Create a version-pinned cache symlink at `~/.claude/plugins/cache/lynx/lynx/1.0.0`
+3. Copy all `skills/`, `hooks/`, and `bin/` directories
+4. Install `lynx-*.md` rules into `~/.claude/rules/`, recording each path in `~/.claude/.lynx-rules-manifest.txt`
+5. Register `lynx@lynx` in `~/.claude/plugins/installed_plugins.json`
+6. Write `~/.claude/.lynx-config.json`
+
+### Path 2 — manual bash (airgapped / custom path)
+
+```bash
+git clone https://github.com/krzemienski/lynx.git /tmp/lynx
+cd /tmp/lynx
+bash install.sh
+```
+
+Override the install directory:
+
+```bash
+LYNX_INSTALL_DIR=/opt/claude-plugins/lynx bash install.sh
+```
+
+Override the version tag:
+
+```bash
+LYNX_VERSION=1.1.0 bash install.sh
+```
+
+### Path 3 — marketplace registration (if already cloned)
+
+If the repo is already on disk and you only want to register it with Claude Code:
+
+```bash
+cd /path/to/lynx
+bash install.sh
+```
+
+`install.sh` detects an existing clone, skips the `git clone` step, and proceeds with
+rules installation and registry update only.
+
+---
+
+## Post-Install Verification
+
+Restart Claude Code, then run:
+
+```bash
+claude plugin list | grep lynx
+```
+
+Expected output:
+
+```
+lynx@lynx  ~/.claude/plugins/lynx  active
+```
+
+Check that rules landed:
+
+```bash
+ls ~/.claude/rules/lynx-*.md
+```
+
+Check the config file exists:
+
+```bash
+cat ~/.claude/.lynx-config.json
+```
+
+Inside an active Claude Code session, confirm the commands are available:
+
+```
+/lynx-setup
+```
+
+---
+
+## Environment Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `CLAUDE_CONFIG_DIR` | `~/.claude` | Root of Claude Code config |
+| `LYNX_INSTALL_DIR` | `$CLAUDE_CONFIG_DIR/plugins/lynx` | Where the plugin is installed |
+| `LYNX_VERSION` | `1.0.0` | Version string used in cache symlink path |
+
+---
+
+## Uninstall
+
+```bash
+bash ~/.claude/plugins/lynx/uninstall.sh
+```
+
+Or from the repo root:
+
+```bash
+bash uninstall.sh
+```
+
+The uninstaller removes:
+- `~/.claude/plugins/lynx/` — installation directory
+- `~/.claude/plugins/cache/lynx/` — version-pinned cache symlink
+- Rules listed in `~/.claude/.lynx-rules-manifest.txt` (only files lynx installed)
+- `~/.claude/.lynx-config.json` — config file
+- `lynx@lynx` entry from `~/.claude/plugins/installed_plugins.json`
+
+After uninstalling, restart Claude Code.
+
+---
+
+## Troubleshooting
+
+### 1. `git: command not found`
+
+**Symptom:** `install.sh` exits immediately with "git not found".
+
+**Fix:** Install git for your OS:
+
+```bash
+# macOS
+xcode-select --install
+
+# Ubuntu / Debian
+sudo apt-get install git
+
+# Fedora / RHEL
+sudo dnf install git
+```
+
+---
+
+### 2. `python3: command not found`
+
+**Symptom:** `install.sh` completes but the plugin registry is not updated.
+
+**Fix:** Install Python 3:
+
+```bash
+# macOS (Homebrew)
+brew install python3
+
+# Ubuntu / Debian
+sudo apt-get install python3
+```
+
+The registry update step (`installed_plugins.json`) uses Python. Without it, Claude Code
+won't recognise the plugin until you add the entry manually or re-run the installer once
+Python is available.
+
+---
+
+### 3. `claude plugin list` shows no lynx entry
+
+**Symptom:** After install, `claude plugin list | grep lynx` returns nothing.
+
+**Diagnosis steps:**
+
+```bash
+# Confirm the registry file exists and contains the key
+python3 -c "import json; d=json.load(open('$HOME/.claude/plugins/installed_plugins.json')); print('lynx@lynx' in d)"
+```
+
+Expected: `True`
+
+If `False`, re-run the installer or manually add:
+
+```bash
+python3 - << 'PYEOF'
+import json, os
+path = os.path.expanduser("~/.claude/plugins/installed_plugins.json")
+d = json.load(open(path)) if os.path.exists(path) else {}
+d["lynx@lynx"] = {"path": os.path.expanduser("~/.claude/plugins/lynx"), "version": "1.0.0"}
+json.dump(d, open(path, "w"), indent=2)
+print("Done")
+PYEOF
+```
+
+Restart Claude Code after editing the registry.
+
+---
+
+### 4. Rules not showing in `~/.claude/rules/`
+
+**Symptom:** `ls ~/.claude/rules/lynx-*.md` returns nothing.
+
+**Cause:** The rules directory may not exist or the installer lacked write permission.
+
+**Fix:**
+
+```bash
+mkdir -p ~/.claude/rules
+bash ~/.claude/plugins/lynx/install.sh
+```
+
+Or copy rules manually:
+
+```bash
+cp ~/.claude/plugins/lynx/rules/lynx-*.md ~/.claude/rules/
+```
+
+---
+
+### 5. `/validate` command not recognised inside Claude Code
+
+**Symptom:** Typing `/validate` in a Claude Code session produces "Unknown command".
+
+**Cause:** Claude Code was not restarted after install, or the skills directory symlink is broken.
+
+**Fix:**
+
+```bash
+# Confirm skills are in place
+ls ~/.claude/plugins/lynx/skills/
+
+# Restart Claude Code fully (quit and reopen), then test:
+# /lynx-setup
+```
+
+If the command is still missing after restart, run `/lynx-setup` to force registration.
+
+---
+
+### 6. `Permission denied` during install
+
+**Symptom:** `install.sh` fails with `Permission denied` when writing to `~/.claude/`.
+
+**Fix:** Ensure your user owns the config directory:
+
+```bash
+ls -la ~/.claude/
+# If owned by root:
+sudo chown -R $USER ~/.claude/
+```
+
+---
+
+### 7. Symlink already exists error
+
+**Symptom:** Install fails with `ln: failed to create symbolic link ... File exists`.
+
+**Fix:** Remove the stale symlink first:
+
+```bash
+rm -rf ~/.claude/plugins/cache/lynx
+bash install.sh
+```
+
+---
+
+## Upgrading
+
+To upgrade to a newer version, uninstall first, then re-install:
+
+```bash
+bash ~/.claude/plugins/lynx/uninstall.sh
+curl -fsSL https://raw.githubusercontent.com/krzemienski/lynx/main/install.sh | bash
+```
+
+Or set a specific version:
+
+```bash
+LYNX_VERSION=1.1.0 bash install.sh
+```
+
+---
+
+## File Inventory
+
+After a successful install the following paths are created:
+
+```
+~/.claude/plugins/lynx/              Plugin installation root
+~/.claude/plugins/cache/lynx/        Version-pinned cache
+~/.claude/rules/lynx-*.md            Injected rule files
+~/.claude/.lynx-config.json          Runtime configuration
+~/.claude/.lynx-rules-manifest.txt   Manifest used by uninstaller
+~/.claude/plugins/installed_plugins.json   Updated with lynx@lynx entry
+```

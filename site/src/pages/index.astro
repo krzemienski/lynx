@@ -1,0 +1,277 @@
+---
+// Lynx landing page — slim, branded, evidence-cited
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="sharp-eyed visual-audit suite for Claude Code. 14/14 detection accuracy across two synthetic shakedowns. No mocks. No test files. Evidence-cited verdicts." />
+    <title>Lynx — sharp-eyed visual-audit for Claude Code</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --color-bg: #0d0d10;
+        --color-surface: #16161c;
+        --color-surface-2: #1d1d26;
+        --color-border: #2a2a36;
+        --color-accent: #d4af37;
+        --color-accent-light: #e8c875;
+        --color-accent-glow: rgba(212, 175, 55, 0.22);
+        --color-text: #e8e8ee;
+        --color-text-muted: #9a9aa8;
+        --color-text-dim: #a8a8b8;
+        --color-success: #22c55e;
+        --color-warning: #f59e0b;
+        --color-code-bg: #1a1a22;
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+        --radius: 0.5rem;
+        --radius-lg: 0.75rem;
+      }
+      html { font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); scroll-behavior: smooth; }
+      body { min-height: 100vh; overflow-x: hidden; }
+      a { color: var(--color-accent-light); text-decoration: none; }
+      a:hover { color: var(--color-accent); }
+
+      nav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 2rem; height: 3.5rem;
+        background: rgba(13, 13, 16, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.1rem; color: var(--color-text); }
+      .nav-brand .accent { color: var(--color-accent-light); }
+      .nav-links { display: flex; align-items: center; gap: 1.5rem; list-style: none; }
+      .nav-links a { color: var(--color-text-muted); font-size: 0.875rem; }
+      .nav-links a:hover { color: var(--color-text); }
+      .nav-cta { background: var(--color-accent); color: #0d0d10; padding: 0.4rem 1rem; border-radius: var(--radius); font-size: 0.875rem; font-weight: 700; }
+      .nav-cta:hover { background: var(--color-accent-light); color: #0d0d10; }
+
+      .hero {
+        min-height: 100vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; text-align: center;
+        padding: 6rem 2rem 4rem;
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,175,55,0.10) 0%, transparent 70%);
+        position: relative;
+      }
+      .hero-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.4);
+        color: var(--color-accent-light); padding: 0.3rem 0.8rem;
+        border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+        margin-bottom: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase;
+      }
+      .hero-title { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.5rem; max-width: 22ch; }
+      .hero-title em { font-style: normal; color: var(--color-accent-light); }
+      .hero-subtitle { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--color-text-muted); max-width: 56ch; line-height: 1.7; margin-bottom: 2.5rem; }
+      .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+      .btn-primary { background: var(--color-accent); color: #0d0d10; padding: 0.75rem 1.75rem; border-radius: var(--radius); font-size: 1rem; font-weight: 700; box-shadow: 0 0 24px var(--color-accent-glow); }
+      .btn-primary:hover { background: var(--color-accent-light); transform: translateY(-1px); color: #0d0d10; }
+      .btn-secondary { background: var(--color-surface-2); color: var(--color-text); border: 1px solid var(--color-border); padding: 0.75rem 1.75rem; border-radius: var(--radius); font-size: 1rem; font-weight: 600; }
+      .btn-secondary:hover { border-color: var(--color-accent); color: var(--color-accent-light); }
+      .install-snippet { margin-top: 2.5rem; display: flex; align-items: center; gap: 0.75rem; background: var(--color-code-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.75rem 1.25rem; font-family: var(--font-mono); font-size: 0.875rem; color: var(--color-text-muted); max-width: 44rem; width: 100%; }
+      .install-snippet .prompt { color: var(--color-accent-light); user-select: none; }
+      .install-snippet code { color: var(--color-text); flex: 1; text-align: left; }
+      .install-snippet button { background: none; border: 1px solid var(--color-border); color: var(--color-text-dim); padding: 0.25rem 0.6rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem; font-family: var(--font-sans); }
+      .install-snippet button:hover { border-color: var(--color-accent); color: var(--color-accent-light); }
+
+      .hero-stats { display: flex; gap: 2.5rem; margin-top: 3.5rem; flex-wrap: wrap; justify-content: center; }
+      .stat { text-align: center; }
+      .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--color-accent-light); }
+      .stat-label { font-size: 0.8rem; color: var(--color-text-dim); margin-top: 0.2rem; letter-spacing: 0.04em; }
+
+      section { padding: 5rem 2rem; }
+      .container { max-width: 72rem; margin: 0 auto; }
+      .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent-light); margin-bottom: 0.75rem; }
+      .section-title { font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+      .section-desc { font-size: 1.05rem; color: var(--color-text-muted); max-width: 56ch; line-height: 1.7; }
+
+      .iron-rule { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02)); border: 1px solid rgba(212,175,55,0.3); border-left: 3px solid var(--color-accent); border-radius: var(--radius-lg); padding: 2rem 2.5rem; margin: 3rem auto; max-width: 72rem; }
+      .iron-rule h3 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent-light); margin-bottom: 1rem; }
+      .iron-rule pre { font-family: var(--font-mono); font-size: 0.9rem; color: var(--color-text); line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+      .iron-rule pre .keyword { color: var(--color-warning); font-weight: 700; }
+
+      .table-wrap { overflow-x: auto; margin-top: 2rem; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+      thead th { background: var(--color-surface); color: var(--color-text-muted); padding: 0.75rem 1rem; text-align: left; font-weight: 600; border-bottom: 1px solid var(--color-border); }
+      tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); vertical-align: top; line-height: 1.5; }
+      tbody tr:last-child td { border-bottom: none; }
+      .badge-pass { color: var(--color-success); font-weight: 700; }
+
+      .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+      .feature-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; }
+      .feature-card:hover { border-color: rgba(212,175,55,0.5); background: var(--color-surface-2); }
+      .feature-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+      .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+      .feature-desc { font-size: 0.875rem; color: var(--color-text-muted); line-height: 1.6; }
+
+      .sibling-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem; margin-top: 2rem; }
+      .sibling-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.25rem; }
+      .sibling-name { font-weight: 700; color: var(--color-accent-light); margin-bottom: 0.4rem; }
+      .sibling-desc { font-size: 0.875rem; color: var(--color-text-muted); line-height: 1.5; }
+
+      .cta-section { text-align: center; background: linear-gradient(135deg, rgba(212,175,55,0.10) 0%, rgba(212,175,55,0.03) 100%); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+      footer { padding: 2rem; text-align: center; border-top: 1px solid var(--color-border); color: var(--color-text-dim); font-size: 0.875rem; }
+      footer a { color: var(--color-text-muted); }
+      footer a:hover { color: var(--color-text); }
+
+      @media (max-width: 640px) {
+        nav { padding: 0 1rem; }
+        .nav-links { display: none; }
+        .hero-stats { gap: 1.5rem; }
+        .iron-rule { padding: 1.25rem 1.5rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-brand"><span class="accent">▲</span> lynx</a>
+      <ul class="nav-links">
+        <li><a href="/install/">Install</a></li>
+        <li><a href="/usage/">Usage</a></li>
+        <li><a href="/architecture/overview/">Architecture</a></li>
+        <li><a href="https://github.com/krzemienski/lynx" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+      <a href="/install/" class="nav-cta">Get Started</a>
+    </nav>
+
+    <main>
+    <section class="hero">
+      <div class="hero-badge">🔬 sharp-eyed visual-audit · 14/14 detection</div>
+      <h1 class="hero-title">See the UI defects <em>tests can't catch</em></h1>
+      <p class="hero-subtitle">
+        Lynx is the sharp-eyed visual-audit suite for Claude Code. Real browser session, real DOM probes, real APCA contrast, real screenshots. No mocks. No test files. Evidence-cited verdicts every time.
+      </p>
+      <div class="hero-actions">
+        <a href="/install/" class="btn-primary">Install lynx →</a>
+        <a href="/usage/" class="btn-secondary">See it in action</a>
+      </div>
+      <div class="install-snippet">
+        <span class="prompt">$</span>
+        <code>/plugin install lynx@lynx-dev</code>
+        <button onclick="navigator.clipboard.writeText('/plugin install lynx@lynx-dev').then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000); })">Copy</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-value">14/14</div><div class="stat-label">Detection</div></div>
+        <div class="stat"><div class="stat-value">2</div><div class="stat-label">Skills</div></div>
+        <div class="stat"><div class="stat-value">5</div><div class="stat-label">Hooks</div></div>
+        <div class="stat"><div class="stat-value">4</div><div class="stat-label">Commands</div></div>
+        <div class="stat"><div class="stat-value">0</div><div class="stat-label">Mocks</div></div>
+      </div>
+    </section>
+
+    <!-- Iron Rule plain-text mirror for grep + screen-readers:
+         IF the real system does not work, FIX THE REAL SYSTEM.
+         NEVER create mocks, stubs, test doubles, or test files.
+         ALWAYS validate through the same interfaces real users experience. -->
+    <div style="padding: 0 2rem;">
+      <div class="iron-rule">
+        <h2>⚡ The Iron Rule</h2>
+        <pre><span class="keyword">IF</span> the real system does not work, <span class="keyword">FIX THE REAL SYSTEM.</span>
+<span class="keyword">NEVER</span> create mocks, stubs, test doubles, or test files.
+<span class="keyword">NEVER</span> write .test.ts, _test.go, Tests.swift, test_*.py, or any test harness.
+<span class="keyword">ALWAYS</span> validate through the same interfaces real users experience.
+<span class="keyword">ALWAYS</span> capture evidence. <span class="keyword">ALWAYS</span> review evidence. <span class="keyword">ALWAYS</span> write verdicts.</pre>
+      </div>
+    </div>
+
+    <section style="background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <p class="section-label">What lynx catches</p>
+        <h2 class="section-title">5 defect classes that bypass functional tests</h2>
+        <p class="section-desc">
+          Each defect below was deliberately seeded into a synthetic UI corpus. Lynx flagged all five through real browser probes — no mock could have detected them.
+        </p>
+        <div class="features-grid">
+          <div class="feature-card"><div class="feature-icon">🔒</div><div class="feature-title">Modal traps</div><div class="feature-desc">Modal opens. Esc disabled. No close button. Unit test confirms it opened — user can't escape it.</div></div>
+          <div class="feature-card"><div class="feature-icon">🏷️</div><div class="feature-title">Form input semantics</div><div class="feature-desc">Placeholder-only inputs without &lt;label for&gt; association. Renders fine. Screen readers can't bind them. WCAG 1.3.1 violation.</div></div>
+          <div class="feature-card"><div class="feature-icon">🎨</div><div class="feature-title">APCA contrast Lc fail</div><div class="feature-desc">Color-only error messages that pass hex-equality but fail perceptual-contrast (APCA Lc &lt; 60). WCAG 2 ratios miss it.</div></div>
+          <div class="feature-card"><div class="feature-icon">📏</div><div class="feature-title">Fixed-px font</div><div class="feature-desc">Caption sized in px, not rem. Breaks at 200% zoom. Ignores user prefs. WCAG 1.4.4 violation.</div></div>
+          <div class="feature-card"><div class="feature-icon">👻</div><div class="feature-title">False affordances</div><div class="feature-desc">cursor:pointer on a span with no click handler. Looks tappable. Isn't. Tests don't notice — users do.</div></div>
+          <div class="feature-card"><div class="feature-icon">🔗</div><div class="feature-title">Token cascade drift</div><div class="feature-desc">Theme token reused across visual roles. Change one role, three downstream components inherit wrongly. Surfaces only at cycle 2.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <p class="section-label">Empirical accuracy</p>
+        <h2 class="section-title">14/14 across two synthetic shakedowns</h2>
+        <p class="section-desc">
+          Lynx ships with two real-target audit corpora. Combined detection rate: 100% on 14 distinct defect classes spanning entanglement-cycle reach and independent-defect convergence.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Corpus</th><th>Defect classes</th><th>Detection</th><th>Convergence mode</th></tr></thead>
+            <tbody>
+              <tr><td>Whac-A-Mole</td><td>9</td><td><span class="badge-pass">9 / 9 = 100%</span></td><td>FAIL on cycle-cap (entangled defects)</td></tr>
+              <tr><td>synth-2</td><td>5</td><td><span class="badge-pass">5 / 5 = 100%</span></td><td>PASS at cycle 2 (independent defects)</td></tr>
+              <tr><td><strong>Combined</strong></td><td><strong>14</strong></td><td><span class="badge-pass">14 / 14 = 100%</span></td><td>Both modes validated</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <p class="section-label">Sibling plugins</p>
+        <h2 class="section-title">Part of the evidence-gated tooling family</h2>
+        <p class="section-desc">
+          Lynx shares an Iron-Rule contract with three sibling Claude Code plugins. All four refuse to ship a verdict without cited evidence. Compose them in multi-plugin pipelines.
+        </p>
+        <div class="sibling-grid">
+          <a href="https://github.com/krzemienski/crucible" target="_blank" rel="noopener" class="sibling-card">
+            <div class="sibling-name">crucible</div>
+            <div class="sibling-desc">Evidence-gated task planning, execution, and validation. Refuses completion without quorum-approved proof.</div>
+          </a>
+          <a href="https://github.com/krzemienski/validationforge" target="_blank" rel="noopener" class="sibling-card">
+            <div class="sibling-name">validationforge</div>
+            <div class="sibling-desc">No-mock functional validation platform. Iron Rule enforced through hooks + skills + agents.</div>
+          </a>
+          <a href="https://github.com/krzemienski/anneal" target="_blank" rel="noopener" class="sibling-card">
+            <div class="sibling-name">anneal</div>
+            <div class="sibling-desc">Multi-variant AI planning framework. Cast / Alloy / Temper plugins for Claude Code.</div>
+          </a>
+          <div class="sibling-card" style="border-color: rgba(212,175,55,0.4);">
+            <div class="sibling-name">lynx</div>
+            <div class="sibling-desc">Sharp-eyed visual-audit specialization. Real DOM, real screenshots, real APCA — no fake screens.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container">
+        <p class="section-label">Quick start</p>
+        <h2 class="section-title">First audit in under 60 seconds</h2>
+        <p class="section-desc" style="margin: 0 auto 2rem;">
+          Install the plugin, restart Claude Code, point lynx at any web app. Verdicts cite real screenshots, real a11y trees, real console logs.
+        </p>
+        <div class="hero-actions" style="justify-content: center; margin-bottom: 2rem;">
+          <a href="/install/" class="btn-primary">Install Guide →</a>
+          <a href="https://github.com/krzemienski/lynx" target="_blank" rel="noopener" class="btn-secondary">View on GitHub</a>
+        </div>
+        <div class="install-snippet" style="margin: 0 auto;">
+          <span class="prompt">$</span>
+          <code>/plugin marketplace add krzemienski/lynx &amp;&amp; /plugin install lynx@lynx-dev</code>
+          <button onclick="navigator.clipboard.writeText('/plugin marketplace add krzemienski/lynx && /plugin install lynx@lynx-dev').then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000); })">Copy</button>
+        </div>
+      </div>
+    </section>
+    </main>
+
+    <footer>
+      <p>
+        lynx · <a href="https://github.com/krzemienski/lynx" target="_blank" rel="noopener">GitHub</a> · <a href="/usage/">Docs</a> · <a href="/architecture/overview/">Architecture</a>
+      </p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+        sharp-eyed visual-audit · v1.1.0 · 2026-04-29
+      </p>
+    </footer>
+  </body>
+</html>

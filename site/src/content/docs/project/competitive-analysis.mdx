@@ -1,0 +1,119 @@
+---
+title: Competitive analysis
+description: How lynx compares to axe-core, Pa11y, Lighthouse, and others
+---
+
+**Last updated:** 2026-04-29
+**Scope:** v1.1.0
+**URL verification:** all 5 cited URLs were WebFetched on 2026-04-29 with HTTP 200 + content match. No memory citations.
+
+---
+
+## Alternatives map
+
+The accessibility / UI-audit landscape has several mature open-source tools. Lynx occupies a specific niche — **evidence-gated audit driven by an LLM agent inside Claude Code, with a multi-cycle entanglement model**. Most alternatives are single-pass linters; lynx audits over cycles and detects defects that surface only after a previous fix.
+
+| # | Tool | License | Surface | Primary use case |
+|---|------|---------|---------|------------------|
+| 1 | **axe-core** | MPL-2.0 | Library + CLI + browser ext | WCAG compliance scanning during dev/CI |
+| 2 | **Pa11y** | LGPL-3.0 | CLI + Node API | Automated accessibility testing in CI |
+| 3 | **Lighthouse** | Apache-2.0 | Chrome DevTools + CLI + Node | Performance + a11y + SEO + best-practices audit |
+| 4 | **Accessibility Insights for Web** | MIT | Chrome / Edge extension | Manual + automated WCAG assessment |
+| 5 | **Playwright (a11y)** | Apache-2.0 | Test runner integration with axe-core | Programmatic a11y assertions in test suites |
+| 6 | **Lynx** | MIT | Claude Code plugin (skills + hooks + commands + agent) | Agent-driven, evidence-gated, multi-cycle UI entanglement audit |
+
+### Source URLs (HTTP 200 verified)
+
+- axe-core: https://github.com/dequelabs/axe-core — "Axe is an accessibility testing engine for websites and other HTML-based user interfaces." (verified 2026-04-29)
+- Pa11y: https://github.com/pa11y/pa11y — "Pa11y is an automated tool that runs accessibility tests on your pages via the command line or Node.js." (verified 2026-04-29)
+- Lighthouse: https://developer.chrome.com/docs/lighthouse/overview — "Lighthouse is an open-source, automated tool to help you improve the quality of web pages." (verified 2026-04-29)
+- Accessibility Insights for Web: https://github.com/microsoft/accessibility-insights-web — "A browser extension for Google Chrome and Microsoft Edge used for assessing the accessibility of web sites and web applications." (verified 2026-04-29)
+- Playwright accessibility: https://playwright.dev/docs/accessibility-testing — "Playwright enables automated accessibility testing through integration with the axe testing engine." (verified 2026-04-29)
+
+---
+
+## Feature matrix
+
+| Feature | axe-core | Pa11y | Lighthouse | A11y Insights | Playwright | Lynx |
+|---------|----------|-------|------------|---------------|------------|------|
+| WCAG 2.x rule scan | ✓ | ✓ | ✓ | ✓ | ✓ (via axe) | ✓ (via skill checklist) |
+| APCA Lc contrast worked example | — | — | — | — | — | ✓ |
+| Single-pass linter | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| **Multi-cycle entanglement detection** | — | — | — | — | — | **✓** |
+| Cycle cap (bounded re-audit) | — | — | — | — | — | ✓ (cap=2) |
+| Real-browser screenshot evidence | partial | partial | ✓ (filmstrip) | ✓ | ✓ | ✓ |
+| Console-error capture in verdict | — | — | ✓ | partial | ✓ | ✓ |
+| Network-request capture | — | — | ✓ | — | ✓ | ✓ (via agent-browser) |
+| **Iron-rule (no-mock) enforcement at hook level** | — | — | — | — | — | **✓** |
+| **Cited-evidence-or-refuse verdict** | — | — | — | — | — | **✓** |
+| **LLM-agent driven** | — | — | — | — | — | **✓** |
+| **Claude Code plugin** | — | — | — | — | — | **✓** |
+| Visual regression (pixel diff) | — | — | — | — | partial | — (out of scope) |
+| Performance audit (Core Web Vitals) | — | — | ✓ | — | — | — (out of scope) |
+| iOS / native UI audit | — | — | — | — | partial | — (v1.3+) |
+| CI / GitHub Actions integration | ✓ | ✓ | ✓ | partial | ✓ | ✓ (manual; Action planned v1.2) |
+
+Bold rows highlight where lynx differentiates. The rest is convergence territory.
+
+---
+
+## Win/Lose analysis
+
+### Where lynx wins
+
+- **Entanglement detection.** Multi-cycle reach is unique. Single-pass linters cannot detect "fixing modal opacity unmasks a different modal trap further down the page." Lynx's cycle-cap model + 14/14 shakedown corpus prove the value empirically.
+- **Iron-rule discipline at the platform level.** No other tool refuses to emit a PASS without cited evidence. axe-core / Pa11y / Lighthouse will happily green-stamp a run with thin output. Lynx's `verdict-writer` agent + 5 hooks structurally prevent this.
+- **Claude Code native.** Lynx is a plugin — invoke `/lynx:audit` mid-conversation, pass URLs, capture evidence, produce a verdict, all without leaving the agent context. Other tools require shelling out + parsing stdout.
+- **Sibling-plugin contract.** Shares an evidence/Iron-Rule contract with `crucible`, `validationforge`, `anneal`. Multi-plugin pipelines compose cleanly.
+- **APCA Lc worked example.** WCAG 2.1's color-contrast rule is widely known to be insufficient (it doesn't model perceptual contrast accurately). Lynx ships an APCA Lc check directly, with worked examples in the synth-2 corpus.
+
+### Where lynx loses
+
+- **Maturity.** axe-core has been in production since 2015 and is embedded in Pa11y, Lighthouse, and Playwright. Lynx is v1.1. The audience that wants 10+ years of edge-case bug fixes should use axe-core.
+- **Performance.** Lighthouse covers Core Web Vitals; lynx does not. Lynx audits structure + entanglement, not page-load time.
+- **CI/CD ecosystem.** Pa11y and Lighthouse have first-party GitHub Actions, Jenkins plugins, etc. Lynx's CI integration is manual until v1.2's GitHub Action ships.
+- **Mobile / native.** Lynx is web-only in v1.1. iOS / native UI audit is on the v1.3+ roadmap. For mobile audit today, native platform tools (Xcode Accessibility Inspector, Android Accessibility Scanner) are the answer.
+- **Static / off-line analysis.** axe-core can run against an HTML string. Lynx requires a live browser session via `agent-browser` MCP. If you don't have a running app, lynx can't audit it.
+- **Adoption surface.** axe-core has hundreds of integrations. Lynx is a Claude Code plugin — the audience is bounded by Claude Code adoption.
+
+---
+
+## Positioning
+
+Lynx is **complementary** to the existing accessibility-tool ecosystem, not a replacement.
+
+- If you want WCAG 2.1 compliance scanning in CI: use **axe-core** (or Pa11y, or Playwright + axe-core).
+- If you want Core Web Vitals + a11y + SEO bundled: use **Lighthouse**.
+- If you want a manual / interactive WCAG assessment tool: use **Accessibility Insights for Web**.
+- If you want a programmatic a11y assertion library inside test suites: use **Playwright + axe-core**.
+- If you want **agent-driven, evidence-gated, multi-cycle entanglement audit inside a Claude Code session, with hooks that block the false-completion patterns LLM agents typically emit**: use **Lynx**.
+
+The intended pairing: **axe-core (or equivalent) for static WCAG-rule coverage** + **lynx for entanglement detection + agent-pipeline integration**. They detect different defect classes; using both is the recommended setup for evidence-gated workflows.
+
+---
+
+## How to choose
+
+| Use case | Pick |
+|----------|------|
+| Static a11y rule scanning in CI | axe-core / Pa11y / Lighthouse |
+| Bundled performance + a11y + SEO | Lighthouse |
+| Manual/interactive WCAG assessment | Accessibility Insights for Web |
+| In-test-suite a11y assertions | Playwright + axe-core |
+| Multi-cycle entanglement audit | **Lynx** |
+| Iron-rule enforcement on LLM-agent pipelines | **Lynx** |
+| Claude Code plugin integration | **Lynx** |
+| iOS / native UI | (none of the above; use platform tools) |
+
+If your workflow already uses Claude Code, lynx is additive — install it alongside any of the above. The 5 hooks block the false-completion patterns LLM agents emit; the verdict-writer agent enforces evidence citation; the skills detect entanglement defects that single-pass linters miss.
+
+---
+
+## Reference
+
+- `PRD.md` — vision, goals, acceptance metrics
+- `ARCHITECTURE.md` — system design + data flow
+- `TECHNICAL-DEBT.md` — known limitations + v1.2 backlog
+- `CONTRIBUTING.md` — skill change protocol, evidence discipline
+
+URL verification log: WebFetch results captured during v1.1.0 doc authoring on 2026-04-29; all 5 returned HTTP 200 with content matching the cited descriptions.

@@ -1,0 +1,206 @@
+---
+title: Product requirements
+description: Product requirements — vision, goals, metrics
+---
+
+**Version:** 1.1.0
+**Status:** Active
+**Last updated:** 2026-04-29
+**Audience:** plugin maintainers, sibling-plugin authors, ops engineers running audits
+
+---
+
+## Vision
+
+Lynx is the sharp-eyed visual-audit plugin for Claude Code — it sees UI defects that escape unit tests, integration tests, and CI pipelines. By auditing **live applications through a real browser session**, lynx catches the entanglement defects that only show up when a user actually clicks, focuses, and reads.
+
+The Iron Rule is load-bearing: every verdict cites real screenshots, real a11y trees, real console logs. No mocks, no fixtures, no test doubles. If the real system fails, lynx flags it; if the test of the test passes, that's not a verdict — it's noise.
+
+Where unit tests prove "the function returns 5 when given 2+3," lynx proves "this modal can be dismissed with the keyboard, and the contrast on this error message clears APCA Lc 60." The first is essential; the second is what users actually experience.
+
+---
+
+## Problem
+
+UI defects that bypass functional tests:
+
+1. **Visual regressions invisible to assertions.** Background/foreground contrast that passes a hex-equality test still fails APCA Lc on a real screen.
+2. **Modal traps.** A modal opens, a unit test confirms it opened. The user can't escape it. No assertion catches that.
+3. **False affordances.** `cursor: pointer` on a span with no click handler. Looks clickable. Isn't. Tests don't notice — users do.
+4. **Form semantics.** Inputs without `<label for>` association. Compiles fine. Renders fine. Screen readers can't bind them. WCAG 1.3.1 violation.
+5. **Token cascade drift.** A theme update changes a CSS variable. Three downstream components inherit the change wrongly. Unit tests still pass — visual review surfaces it.
+
+These defects share a property: **they only show up when the real UI runs in a real browser**. Mock-driven testing cannot detect them, because the mock surface is too thin to reproduce the conditions that surface the defect.
+
+Existing accessibility tools (Lighthouse, axe-core, Pa11y) are excellent at WCAG-rule violations. They are not designed to catch entanglements (e.g., "fixing modal opacity unmasks a different modal trap further down the page" — a multi-cycle defect). They also do not run as Claude Code plugins inside a multi-skill audit pipeline, which is where lynx's value compounds.
+
+---
+
+## Goals
+
+### Primary goals (v1.1)
+
+1. **Discoverability.** A user landing on lynx's documentation can within 60 seconds understand what lynx does, see the empirical accuracy claim (14/14), and copy a one-line install + first-audit invocation. (Plan handoff in v1.2 — see `evidence/oracle-plan-reviews/20260429T164604Z/plan.md`.)
+2. **Plugin surface parity with siblings.** Hooks, slash commands, agents, install/uninstall scripts, root docs that match the depth of `validationforge`, `crucible`, `anneal`. (Achieved in v1.1.0 — partial; full parity ships v1.2.)
+3. **Iron rule enforcement at the hook layer.** 5 hooks block test-file creation, mock patterns, fake completion claims, evidence-less verdicts. (v1.1.0 ships all 5.)
+
+### Secondary goals (v1.2)
+
+1. **Public site at `lynx.\<root\>` subdomain.** Astro/Starlight stack mirroring `validationforge.dev`.
+2. **Multi-page blog series at `/Users/nick/Desktop/blog-series/lynx/`.** 7 markdown files mirroring sibling format.
+3. **Final regression matrix.** All 16 user journeys from `.planning/validation-plan.md` PASS in a fresh CC session.
+
+### Non-goals
+
+- **NOT** rewriting the two existing skills. They're frozen at 14/14 detection.
+- **NOT** introducing iOS / native audit support (planned for v1.3+).
+- **NOT** scope-creeping into a unit-test framework, static analyzer, or CI runner.
+- **NOT** writing test files, mocks, or fixtures anywhere in the plugin.
+
+---
+
+## Non-goals (explicit)
+
+The following are deliberately out of scope. PRs targeting them are rejected at triage:
+
+| Non-goal | Why |
+|----------|-----|
+| Mock-driven test harness | Iron Rule violation |
+| iOS / native UI audit | Skill scope is web-only in v1.1; iOS planned for v1.3+ |
+| Performance profiling | Use Lighthouse, WebPageTest |
+| Security scanning | Use OWASP ZAP, Snyk |
+| Visual regression baselines (pixelmatch) | Scope creep; lynx audits structure, not pixel-equality |
+| LLM-driven defect discovery without browser session | Iron Rule violation (no real browser → no verdict) |
+
+---
+
+## User personas
+
+### Persona 1 — Plugin Installer
+
+- **Who:** A Claude Code user evaluating audit plugins
+- **Scenario:** Reads README + site landing → wants to install + run their first audit in \<2 minutes
+- **Success:** `bash install.sh` exits 0; `/lynx:audit` produces a verdict on their app's first screen
+- **Friction points to eliminate:** unclear install path, missing dependency notes, agent-browser MCP setup hidden
+
+### Persona 2 — Sibling-Plugin Author
+
+- **Who:** A maintainer of crucible, validationforge, or anneal evaluating lynx for cross-plugin contract
+- **Scenario:** Reads ARCHITECTURE + AGENTS + CLAUDE.md → wants to confirm lynx honors the shared evidence-gate contract
+- **Success:** Sees "no mocks, no test files, real systems only" verbatim; sees evidence-citation discipline; can integrate lynx into a multi-plugin pipeline
+- **Friction points to eliminate:** ambiguity about who owns evidence dirs, what the verdict-writer agent will refuse to do
+
+### Persona 3 — Ops Engineer
+
+- **Who:** A team's ops engineer running audits in CI / staging
+- **Scenario:** Wants to run `/lynx:audit` against staging URL on every PR; wants `verdict-writer` to refuse on missing evidence; wants `e2e-evidence/` reviewable in GitHub
+- **Success:** Run-verdict reproduces across machines; evidence chain of custody is verifiable
+- **Friction points to eliminate:** non-deterministic results, evidence files non-portable
+
+---
+
+## Functional requirements
+
+| ID | Requirement | v1.1 status | Evidence |
+|----|-------------|-------------|----------|
+| FR-1 | Plugin manifest declares hooks/commands/agents | SHIPPED | `e2e-evidence/phase-01-plugin/manifest-parse.json` |
+| FR-2 | 5 hooks block test/mock/false-completion patterns | SHIPPED | `e2e-evidence/phase-01-plugin/hook-fire-log.txt` (6 exit=2, 7 blocked events) |
+| FR-3 | 4 slash commands register in fresh CC session | SHIPPED | `e2e-evidence/phase-01-plugin/command-register.txt` (45 `/lynx:` matches) |
+| FR-4 | `verdict-writer` agent refuses PASS without cited evidence | SHIPPED | `agents/verdict-writer.md:148` line count + `agent-run-verdict.md` (5 PASS rows + 6 evidence: lines) |
+| FR-5 | Install/uninstall scripts round-trip cleanly | SHIPPED | `e2e-evidence/phase-01-plugin/install-script-trace.txt` (sandbox PASS) |
+| FR-6 | Detection accuracy ≥ 14/14 across both shakedowns | HOLDS | `shakedowns/synth-2/SUMMARY.md` (5/5) + `shakedowns/whac-a-mole/` (9/9) |
+| FR-7 | Static site at `lynx.\<root\>` subdomain | DEFERRED v1.2 | plan.md MSC-21..30 |
+| FR-8 | Multi-page blog at `blog-series/lynx/` | DEFERRED v1.2 | plan.md MSC-31..38 |
+| FR-9 | Full regression matrix (16 journeys) PASS | DEFERRED v1.2 | plan.md MSC-39..43 |
+
+---
+
+## Acceptance metrics
+
+The load-bearing empirical claim for lynx is **detection accuracy 14/14 = 100%** across two synthetic shakedowns:
+
+- **Whac-A-Mole** (`shakedowns/whac-a-mole/`): 9/9 defects flagged, 0 missed, 0 false-positives. Tests entanglement reach (cycle-2 trigger), shared-token cascade, response-shape contract, modal opacity, disabled-but-clickable, whitespace-only label.
+- **synth-2** (`shakedowns/synth-2/SUMMARY.md`): 5/5 defects flagged. Tests modal trap (esc-disabled), unlabeled inputs, color-only error / APCA fail, fixed-px caption, cursor:pointer no-handler.
+
+Combined: 14/14 distinct defect classes, all detected. This claim is verifiable by anyone who clones the repo and runs the audit against the corpus.
+
+Secondary metrics (quantitative):
+
+| Metric | Target (v1.1) | Source |
+|--------|---------------|--------|
+| Detection rate | 14/14 = 100% | shakedowns/synth-2/SUMMARY.md + shakedowns/whac-a-mole/ |
+| False-positive rate | 0/14 | shakedowns/synth-2/findings.md |
+| Cycle-cap reach | ≤ 2 | per-skill spec |
+| Hook fire-log entries | ≥ 10 (5 hooks × 2 cases) | e2e-evidence/phase-01-plugin/hook-fire-log.txt (67 lines, 6 exit=2 + 15 exit=0) |
+| Plugin manifest validation | exit 0 | e2e-evidence/phase-01-plugin/claude-plugin-validate.txt |
+| Slash-command register | ≥ 4 `/lynx:` matches | e2e-evidence/phase-01-plugin/command-register.txt (45 matches) |
+| Install round-trip | exit 0 + json clean post-uninstall | e2e-evidence/phase-01-plugin/install-script-trace.txt |
+
+---
+
+## Roadmap
+
+### v1.0.0 (shipped 2026-04-23)
+
+- 2 production skills (full-ui-experience-audit + ui-experience-audit)
+- Brand assets, marketplace stub, README, LICENSE
+- 14/14 detection validated on WAM + synth-2
+
+### v1.1.0 (this release, 2026-04-29)
+
+- 5 hooks
+- 4 slash commands
+- 1 sub-agent (verdict-writer)
+- Install + uninstall scripts
+- 8 root docs (ARCHITECTURE, INSTALL, USAGE, CLAUDE, AGENTS, CONTRIBUTING, TECHNICAL-DEBT, PRD)
+- 3 mermaid diagrams + 1 excalidraw stub in `diagrams/`
+- CHANGELOG, plugin.json + marketplace.json bumped to 1.1.0
+
+### v1.2.0 (planned, target Q3 2026)
+
+- README expansion (5 new sections)
+- COMPETITIVE-ANALYSIS.md URL-verified citation pass
+- Astro/Starlight static site at `lynx.\<root\>` subdomain
+- Live deploy on Vercel with TLS
+- Multi-page blog series at `blog-series/lynx/` (7 markdown files)
+- Announcement post on blog series root index
+- Full regression matrix (16 journeys) green
+- Final report + git tag v1.2.0
+
+### v1.3.0 (speculative)
+
+- Cross-session run-state tracker (resumable audits)
+- Evidence-quality-check hook (scoring layer)
+- iOS / native UI audit support (separate skill)
+- Custom lynx MCP server (only if a use case emerges that agent-browser + context7 don't cover)
+
+### v1.4.0 (speculative)
+
+- Consensus-validator agent (3-reviewer parallel quorum) — only if single-validator FP rate exceeds 10%
+
+---
+
+## Risk + mitigation
+
+| Risk | Mitigation |
+|------|------------|
+| `agent-browser` MCP becomes unavailable | Document as hard runtime dep; Phase 0 preflight refuses to start |
+| Skill change accidentally breaks 14/14 | CONTRIBUTING.md mandates re-running both shakedowns; PR template enforces |
+| Iron rule erosion through "small exceptions" | All 5 hooks enforce; `block-test-files` + `mock-detection` are merge-gates |
+| Subdomain provisioning blocked at registrar | Fall back to subdomain on `validationforge.dev` (sibling owner is same user) |
+| TLS certificate not issued in time | Vercel handles Let's Encrypt automatically; manual fallback available |
+
+---
+
+## Reference
+
+- `ARCHITECTURE.md` — system design, data flow, sibling comparison
+- `CLAUDE.md` — agent operating directives
+- `AGENTS.md` — same content for non-Claude agents
+- `INSTALL.md` — install paths + verification
+- `USAGE.md` — 9 worked examples
+- `CONTRIBUTING.md` — dev setup, skill change protocol, PR checklist
+- `TECHNICAL-DEBT.md` — limitations + v1.2 backlog
+- `CHANGELOG.md` — release history
+- `evidence/oracle-plan-reviews/20260429T164604Z/plan.md` — 43-MSC executable plan (oracle-APPROVED)
+- `shakedowns/synth-2/SUMMARY.md` + `shakedowns/whac-a-mole/` — empirical claim sources

@@ -1,0 +1,24 @@
+---
+title: Lynx Docs
+description: sharp-eyed visual-audit suite for Claude Code — 14/14 detection, no mocks, evidence-cited verdicts
+template: splash
+hero:
+  tagline: "Real DOMs. Real screenshots. Real APCA contrast. No mocks."
+  actions:
+    - text: Install
+      link: /install/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/krzemienski/lynx
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Install" icon="rocket">[Install lynx in your CC session](/install/)</Card>
+  <Card title="Architecture" icon="setting">[How lynx audits live UIs](/architecture/overview/)</Card>
+  <Card title="Usage" icon="open-book">[9 worked examples](/usage/)</Card>
+  <Card title="Reference" icon="document">[Claude / Agents guide](/reference/claude/)</Card>
+</CardGrid>

@@ -1,0 +1,16 @@
+---
+title: Hooks
+description: 5 hooks that enforce the Iron Rule at the platform layer
+---
+
+## The 5 lynx hooks
+
+| Hook | Event | Role |
+|------|-------|------|
+| `block-test-files` | PreToolUse Write/Edit/MultiEdit | Block creation of `*.test.*`, `*.spec.*`, `tests/`, `__tests__/` |
+| `mock-detection` | PreToolUse Write/Edit/MultiEdit | Block content matching mock/stub/fixture/test-double patterns |
+| `validation-not-compilation` | PostToolUse Bash | Reminder when build success is mistaken for validation |
+| `evidence-gate-reminder` | PreToolUse TaskUpdate | Surface evidence checklist on completion claims |
+| `completion-claim-validator` | PostToolUse Bash | Catch passed/succeeded claims without cited evidence |
+
+All 5 hooks were fire-tested against real trigger + benign payloads — see `e2e-evidence/phase-01-plugin/hook-fire-log.txt`.

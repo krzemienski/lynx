@@ -1,0 +1,302 @@
+---
+title: Claude Code agent guide
+description: Claude Code agent operating directives
+---
+
+Behavioral and operational directives for Claude Code sessions working inside the
+**lynx** plugin repository. These rules override default assistant behavior. Read
+this file before any task that touches plugin skills, hooks, commands, or evidence
+directories.
+
+---
+
+## Philosophy
+
+1. **Audit live systems, never mock them.** Every verdict must come from a real
+   browser session driven by `agent-browser` MCP. No stubs, no hand-written
+   "expected" HTML, no fixture responses.
+
+2. **Evidence gates verdicts.** A PASS verdict without a cited screenshot path,
+   a11y JSON path, and console-log path is invalid. The burden of proof is on the
+   auditor, not the reviewer.
+
+3. **Skills are frozen after shakedown.** The two lynx skills —
+   `full-ui-experience-audit` and `ui-experience-audit` — were locked at 14/14
+   detection rate (WAM 9/9 + synth-2 5/5). **Do not modify skills without
+   re-running shakedowns.** Any skill edit that breaks the 14/14 gate must be
+   reverted before merge.
+
+4. **Smallest viable audit scope.** Use `ui-experience-audit` (single-screen) for
+   targeted re-runs. Reserve `full-ui-experience-audit` for full sweeps. Do not
+   run a full sweep to debug a single screen failure.
+
+5. **Fix loops are bounded.** Maximum 3 fix attempts per failing screen. After 3
+   attempts mark the screen `UNFIXABLE` and continue. Never block the full run on
+   one stuck flow.
+
+6. **Cycle cap is 2.** WAM-class entanglement requires cycle-2 reach to trigger;
+   synth-2-class requires cycle-1 reach. Audits that exceed the cycle cap without
+   a finding emit a `CLEAN` verdict, not an error.
+
+7. **One source of truth per run.** All evidence for a run lives under
+   `e2e-evidence/<run-id>/`. No evidence is written outside that directory.
+   No evidence is fabricated after the fact or retroactively timestamped.
+
+---
+
+## Quick Start
+
+```
+/lynx:audit              Full audit sweep across all registered screens
+/lynx:audit <screen>     Single-screen targeted audit
+/lynx:status             Show current run state and per-screen verdicts
+/lynx:clean              Prune evidence older than TTL (default 30 days)
+```
+
+The `agent-browser` MCP must be active before invoking any audit command. Verify
+with `/lynx:status` — it reports `agent-browser: connected` or `agent-browser: MISSING`.
+A missing `agent-browser` is a hard blocker; no audit phase will start.
+
+---
+
+## The 4-Phase Audit Pipeline
+
+```
+Phase 0  PREFLIGHT   ── Verify agent-browser reachable, screen list non-empty
+Phase 1  AUDIT       ── Per-screen loop: screenshot → a11y tree → console → interact
+Phase 2  SYNTHESIS   ── verdict-writer reads all screen-*-verdict.md → run-verdict.md
+Phase 3  SHIP GATE   ── run-verdict.md PASS → evidence-cleanup.sh eligible
+                        run-verdict.md FAIL → fix loop, evidence preserved
+```
+
+### Phase 0 — Preflight
+
+Before spawning any audit agent:
+
+- Confirm `agent-browser` MCP responds to a health ping.
+- Confirm at least one screen URL is registered (via skill config or explicit argument).
+- Confirm `e2e-evidence/` is writable.
+
+If any preflight check fails, abort with a structured error. Do not attempt Phase 1
+against a system with a broken dependency.
+
+### Phase 1 — Audit Loop
+
+For each screen in scope, the audit skill executes in strict order:
+
+| Step | Action | Evidence file |
+|------|--------|---------------|
+| 01 | Navigate + full-page screenshot | `step-01-load.png` |
+| 02 | Capture a11y tree snapshot | `step-02-a11y.json` |
+| 03 | Collect console errors | `step-03-errors.txt` |
+| 04 | Interaction (tap / scroll / form) + screenshot | `step-04-interaction.png` |
+| 05 | Write per-screen verdict | `screen-N-verdict.md` |
+
+Steps execute in order. A step that fails does not skip subsequent steps — capture
+what you can, mark missing evidence explicitly in the verdict.
+
+### Phase 2 — Synthesis
+
+The `verdict-writer` agent activates after ALL screens complete (or all screens
+exhaust their fix-loop attempts). It:
+
+1. Reads every `screen-*-verdict.md` in the run directory.
+2. Aggregates individual verdicts into a single `run-verdict.md`.
+3. Emits one of: `PASS`, `FAIL`, or `CONDITIONAL` with a rationale and evidence
+   citation list.
+
+The verdict-writer does NOT re-run any audit steps. It is a pure reader/synthesizer.
+
+### Phase 3 — Ship Gate
+
+| run-verdict.md | Outcome |
+|----------------|---------|
+| `PASS` | Evidence eligible for pruning after TTL. Ship is unblocked. |
+| `CONDITIONAL` | Ship with documented risk acceptance. Evidence preserved. |
+| `FAIL` | Fix loop triggered. Evidence preserved. Re-run required. |
+
+---
+
+## Entanglement Detection
+
+Lynx detects two classes of UI entanglement:
+
+### WAM-class (cycle-2 reach)
+
+WAM-class entanglement is detected when a UI interaction on screen A propagates
+state changes that reach screen B through at least two intervening component
+boundaries (cycle-2). The audit skill traces the propagation path and records
+each boundary crossing in `step-04-interaction.png` annotations.
+
+Evidence artifacts: annotated screenshot, DOM diff JSON, component boundary log.
+
+### synth-2-class (cycle-1 reach)
+
+synth-2-class entanglement triggers on cycle-1 reach — state from screen A leaks
+directly into screen B with no intermediate boundary. Simpler to detect, higher
+severity when found.
+
+Evidence artifacts: annotated screenshot, console error log, a11y tree diff.
+
+### Cycle cap enforcement
+
+The cycle cap is **2**. An audit traversal that reaches depth 2 without finding
+entanglement emits `CLEAN`. Traversals do not continue past depth 2 regardless of
+graph structure. This bounds audit runtime and prevents runaway traversal on
+deeply connected SPAs.
+
+---
+
+## Evidence Rules
+
+### Directory structure
+
+```
+e2e-evidence/
+  <run-id>/
+    screen-1/
+      step-01-load.png
+      step-02-a11y.json
+      step-03-errors.txt
+      step-04-interaction.png
+      screen-1-verdict.md
+    screen-2/
+      ...
+    run-verdict.md
+```
+
+### Naming convention
+
+`step-{NN}-{action}.{ext}` — zero-padded two-digit step number, hyphenated action
+description, appropriate extension. Examples:
+
+- `step-01-load.png`
+- `step-02-a11y.json`
+- `step-03-console-errors.txt`
+- `step-04-scroll-interaction.png`
+
+### Quality standards
+
+| Requirement | Rule |
+|-------------|------|
+| Non-empty | Every evidence file must be >0 bytes. Zero-byte files are invalid. |
+| Timestamped | Console logs must include timestamps. Screenshots must match execution timeline. |
+| Cited | Every PASS/FAIL criterion in a verdict must cite a specific evidence file path. |
+| Unmodified | Evidence is captured at execution time. Retroactive edits invalidate the run. |
+| Scoped | No evidence written outside `e2e-evidence/<run-id>/`. |
+
+### Evidence retention
+
+Evidence follows TTL rules configured in `.lynx/config.json` (`evidence_retention_days`,
+default 30). The `/lynx:clean` command removes evidence older than the TTL. FAIL
+evidence is preserved until explicitly cleaned regardless of TTL.
+
+A lock file at `.lynx/state/audit-in-progress.lock` prevents `/lynx:clean` from
+running while an audit is active. The lock is written at Phase 0 start and removed
+at Phase 3 completion.
+
+---
+
+## Iron Rules
+
+1. **No mocks, no fixtures, no test doubles.** Every audit runs against a live
+   system reachable by `agent-browser`. Forbidden: mock HTTP servers, fixture HTML
+   files, pre-recorded browser sessions, stub MCP responses.
+
+2. **Cite or refuse.** Every PASS or FAIL verdict must cite a specific evidence
+   file path (not a directory, not a prose description). A verdict without a
+   citation is invalid and must be regenerated.
+
+3. **Do not modify skills without re-running shakedowns.** The frozen skill set
+   (`full-ui-experience-audit`, `ui-experience-audit`) was validated at 14/14
+   detection rate. Any change to skill content — including wording, step order,
+   criterion thresholds — requires a full shakedown re-run (WAM 9/9 + synth-2
+   5/5) before the change is accepted.
+
+4. **No self-review.** The agent that produces a screen verdict may not also act
+   as the verdict-writer synthesizer. The verdict-writer reads raw evidence; it
+   does not re-examine the work of the audit agent that produced it.
+
+5. **Fix loops are bounded.** Three attempts per failing screen, maximum. Each
+   attempt must target a different root cause. Retrying the same fix consumes one
+   attempt. After three failures, mark `UNFIXABLE` and proceed.
+
+6. **Preflight is a hard gate.** Phase 1 does not start if Phase 0 fails. There
+   is no `--skip-preflight` flag. A broken `agent-browser` connection is a
+   blocking error, not a warning.
+
+7. **Evidence chain of custody.** Evidence is written once, at capture time, by
+   the audit agent. It is never rewritten, re-dated, or supplemented after the
+   fact. The verdict-writer is a reader only.
+
+---
+
+## Skill Reference
+
+| Skill | Scope | Trigger |
+|-------|-------|---------|
+| `full-ui-experience-audit` | All registered screens | `/lynx:audit` (no argument) |
+| `ui-experience-audit` | Single named screen | `/lynx:audit <screen>` |
+
+Both skills require `agent-browser` MCP. Both write evidence under
+`e2e-evidence/<run-id>/`. Both produce `screen-N-verdict.md` per screen.
+`full-ui-experience-audit` iterates all screens automatically;
+`ui-experience-audit` targets exactly one.
+
+Skill files live in `.claude/skills/`. Read them before any audit session to
+confirm they match the expected frozen version (check the shakedown date comment
+at the top of each skill file).
+
+---
+
+## Hook Reference
+
+| Hook | Phase | Purpose |
+|------|-------|---------|
+| `gateguard-fact-force.js` | PreToolUse (Write) | Blocks new file creation until 4 facts stated |
+| `evidence-gate-reminder.js` | TaskUpdate | Evidence checklist on completion claims |
+| `validation-not-compilation.js` | PostToolUse (Bash) | Reminds that build pass ≠ audit pass |
+| `dev-rules-reminder.cjs` | UserPromptSubmit | Injects datetime, CWD, active plan |
+| `subagent-context-enforcer.js` | PreToolUse (Agent) | Warns if subagent lacks context |
+
+---
+
+## Sibling Plugin Boundaries
+
+Lynx shares the same Claude Code plugin infrastructure as `anneal`, `crucible`,
+and `validationforge`. These boundaries are strict:
+
+- Lynx skills audit **UI/UX behavior**. They do not run build pipelines (crucible),
+  perform functional validation sweeps (validationforge), or manage code quality
+  refinement (anneal).
+- Skills are **not shared** across plugins. Do not copy a lynx skill into another
+  plugin or vice versa — each plugin's skill set is tuned and validated
+  independently.
+- Evidence directories are **plugin-scoped**. Lynx evidence lives under
+  `e2e-evidence/`. It does not overlap with `crucible/evidence/` or
+  `validationforge/e2e-evidence/` in sibling repos.
+
+---
+
+## Common Pitfalls
+
+**"agent-browser not responding"** — Check that the MCP server process is running.
+`/lynx:status` shows connection state. Restart the MCP server before re-running
+preflight.
+
+**"skill file modified after shakedown"** — If `git diff` shows changes to
+`.claude/skills/full-ui-experience-audit` or `.claude/skills/ui-experience-audit`,
+the frozen skill invariant is violated. Revert the changes or re-run the full
+shakedown suite before continuing.
+
+**"zero-byte evidence file"** — `agent-browser` failed to capture. Check the
+browser console for navigation errors. The most common cause is a screen URL that
+requires authentication the audit session doesn't have.
+
+**"verdict-writer citing parent directory"** — Citations must be file-level, not
+directory-level. `e2e-evidence/run-42/screen-1/` is not a valid citation.
+`e2e-evidence/run-42/screen-1/step-01-load.png` is.
+
+**"fix loop exhausted"** — After 3 attempts, the screen is `UNFIXABLE` for this
+run. Do not attempt a 4th fix by renaming the attempt directory. Document the
+failure in `run-verdict.md` and escalate to the team.

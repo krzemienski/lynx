@@ -1,0 +1,15 @@
+---
+title: Commands
+description: 4 slash commands — audit, audit-screen, status, report
+---
+
+## The 4 lynx slash commands
+
+| Command | Trigger | Skill |
+|---------|---------|-------|
+| `/lynx:audit` | Full project audit | full-ui-experience-audit |
+| `/lynx:audit-screen <id>` | Single-screen audit | ui-experience-audit |
+| `/lynx:status` | Most recent run state | (read-only) |
+| `/lynx:report` | Human-readable summary | (read-only) |
+
+Source: [`commands/`](https://github.com/krzemienski/lynx/tree/main/commands) — each command has YAML frontmatter declaring allowed-tools and argument-hint per Claude Code's slash-command spec.
