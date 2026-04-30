@@ -1,0 +1,145 @@
+# Lynx Technical Debt
+
+This file enumerates known limitations, deferred features, and Iron-Rule blast-radius considerations for the lynx plugin. It is the canonical source for the v1.2 backlog (and beyond). Items shipped in v1.2.0+ are removed; deferred-with-rationale items remain.
+
+**Scope:** v1.1.0 (current) → v1.2.0 (next planned release)
+**Last updated:** 2026-04-29
+
+---
+
+## Known limitations (v1.1.0)
+
+| Limitation | Surface | Status | Workaround |
+|------------|---------|--------|------------|
+| `agent-browser` MCP is a hard runtime dependency | Audit pipeline Phase 0 | by design (v1.1) | No workaround; install agent-browser before any audit |
+| No iOS / native audit support | Skill scope | by design (v1.1) | Web-only audits; iOS planned for v1.3+ |
+| Cycle cap fixed at 2 | Both skills | by design | Configurable cap deferred to v1.2 |
+| No persistent run-state across CC sessions | Audit lifecycle | by design (v1.1) | Each session starts a fresh run; evidence preserved on disk |
+| `verdict-writer` agent must be installed via `bash install.sh` + CC reload before invocation | v1.1 first-time UX | known | Phase 6 regression validates after reload; not a v1.1.0 ship blocker |
+| No first-class evidence search / indexing tool | Post-audit workflow | known | `grep -r "evidence:" e2e-evidence/` is the manual fallback |
+| No multi-screen discovery (auto-list all routes) | Phase 0 preflight | known | User must register screen URLs explicitly |
+| Subdomain `lynx.<root>` not yet provisioned | Public site | deferred | v1.2 — see plan.md MSC-26..30 |
+| Astro/Starlight static site not yet built | Public discoverability | deferred | v1.2 — see plan.md MSC-21..25 |
+| Multi-page blog post on /Users/nick/Desktop/blog-series/lynx/ not yet authored | Distribution | deferred | v1.2 — see plan.md MSC-31..40 |
+| 5 ranked Required Skills curated manually (delta) rather than auto-discovered | Phase 2.5 enrichment | known | discoverer's strict cache-exclusion + 0.1 floor refuses on partially-orthogonal briefs; manual curation is the documented fallback per `/crucible:remediate` |
+
+---
+
+## Deferred features (v1.2 backlog)
+
+Sourced from `e2e-evidence/phase-00-recon/component-decision-matrix.md` v1.2 backlog table (lines 47–54). Each item: what / why deferred / target version / re-evaluate trigger.
+
+### `evidence-quality-check.js` hook
+
+- **What:** PostToolUse scoring layer that grades evidence file quality (screenshot pixel count, JSON well-formedness, log non-empty).
+- **Why deferred:** Adds hook complexity before the v1.1 baseline (5 hooks) is empirically stable. Premature optimization.
+- **Target version:** v1.2.0
+- **Re-evaluate when:** After 5+ post-v1.1 audit runs reveal consistent quality gaps in evidence files (e.g. 0-byte console logs, blurred screenshots).
+
+### `validation-state-tracker.js` hook
+
+- **What:** Tracks audit state across CC sessions (e.g. "you started a sweep yesterday at 14:00; resume?").
+- **Why deferred:** Cross-session state requires storage design (SQLite vs JSON). Premature for v1.1.
+- **Target version:** v1.2.0 or v1.3.0
+- **Re-evaluate when:** Interrupted-then-resumed audits become a reported friction point in user feedback.
+
+### `consensus-validator` agent
+
+- **What:** Spawns 3 reviewer subagents in parallel against the same run; emits a consensus PASS/FAIL.
+- **Why deferred:** Multi-agent consensus multiplies token cost; single `verdict-writer` is sufficient for v1.1's accuracy bar (14/14 baseline).
+- **Target version:** v1.3.0
+- **Re-evaluate when:** Single-validator false-positive rate exceeds 10% across run verdicts.
+
+### `evidence-capturer` agent
+
+- **What:** Captures screenshots / a11y trees / console logs as a dedicated agent (instead of inline via `agent-browser` MCP).
+- **Why deferred:** `agent-browser` MCP subsumes all v1.1 capture needs natively. A dedicated capture agent adds an indirection layer.
+- **Target version:** v1.3.0+ (only if agent-browser MCP becomes unavailable or insufficient)
+- **Re-evaluate when:** agent-browser MCP is deprecated, or its capture quality regresses.
+
+### `/lynx:setup` slash command
+
+- **What:** Slash-command wrapper around `bash install.sh` for first-time onboarding.
+- **Why deferred:** `install.sh` already covers bootstrap; a slash-command wrapper adds no value until UX polish phase.
+- **Target version:** v1.2.0
+- **Re-evaluate when:** v1.1 ships and user onboarding friction is measured (e.g., support tickets asking how to install).
+
+### Custom lynx MCP server
+
+- **What:** A dedicated MCP server exposing lynx-specific tools (e.g., evidence indexing API, audit-status query).
+- **Why deferred:** No v1.1 use case requires it — `agent-browser` + `context7` MCPs cover audit + doc-lookup. Adding a custom MCP duplicates work.
+- **Target version:** v1.4.0+
+- **Re-evaluate when:** A lynx-specific tool emerges (e.g., evidence indexing API, run-history query) that no existing MCP covers.
+
+---
+
+## v1.2 doc + site backlog
+
+Per `evidence/oracle-plan-reviews/20260429T164604Z/plan.md`, the following MSCs are deferred from v1.1.0 to v1.2.0:
+
+| MSC range | Description | v1.2 target |
+|-----------|-------------|-------------|
+| MSC-20 | README.md expansion (5 new sections + link-check) | v1.2 |
+| MSC-21..25 | Astro/Starlight site scaffold + content + landing + screenshots + Lighthouse | v1.2 |
+| MSC-26..30 | Subdomain + Vercel deploy + DNS + TLS + DOM diff | v1.2 |
+| MSC-31..38 | Multi-page blog content under blog-series/lynx/ | v1.2 |
+| MSC-39..43 | Full pipeline regression + FINAL-REPORT.md + git tag v1.2.0 | v1.2 |
+
+Each MSC has a PASS/FAIL spec inline in plan.md.
+
+---
+
+## Iron-Rule blast radius
+
+The Iron Rule (no mocks, no test files, real-systems-only) is load-bearing. Changing it would break:
+
+### What the Iron Rule prevents
+
+- **False positives in skill detection.** Skills validated against real corpora (synth-2, WAM) have empirical detection rates. A mock-driven test suite could rubber-stamp regressions.
+- **Evidence trail integrity.** Every `evidence: <path>` cite must resolve to a real file. Removing this constraint allows fabricated verdicts.
+- **Reviewer trust.** PR reviewers can `test -f` cited evidence and confirm the claim. Mock-acceptance erodes the reviewer's signal.
+
+### What would break if iron rule were relaxed
+
+- The 14/14 detection metric becomes meaningless (could be inflated by stub corpora)
+- The 5 hooks (block-test-files, mock-detection, etc.) lose enforcement context
+- The shakedown protocol becomes optional — and skills drift
+- Sibling-plugin parity with crucible/validationforge/anneal breaks (they all enforce iron rule)
+
+### When iron-rule relaxation might be discussed
+
+If a non-functional concern (e.g., type-checking, lint) is mistakenly conflated with "validation," some path may exist for explicit unit tests on hook implementations themselves. This is an open question for v1.3 — current stance is firm NO.
+
+---
+
+## Out of scope (won't fix)
+
+- Mobile/native UI auditing (use platform-specific tools)
+- Performance profiling (use Lighthouse, WebPageTest)
+- Security scanning (use OWASP ZAP, Snyk)
+- Dependency vulnerability detection (use Dependabot, Renovate)
+
+Lynx's scope is narrow on purpose: it audits live UIs through a real browser session for entanglement defects. Adopting a broader scope would dilute the iron rule and the shakedown discipline.
+
+---
+
+## How to propose a v1.2 addition
+
+1. Open an issue with the proposal + concrete use case + which v1.1 limitation it addresses
+2. Include the smallest viable skill / hook / command shape
+3. State the empirical metric it would unblock (e.g., "this hook would catch defect class X currently missed by skills")
+4. Wait for maintainer triage before implementing
+
+PRs without prior issue discussion are deferred until the issue exists.
+
+---
+
+## v1.2 timeline
+
+No fixed date. v1.2.0 ships when:
+- Phase 5 of DEEPEST-PROMPT.xml (blog content) ships
+- Phase 6 (full pipeline regression) PASS
+- 14/14 detection metric still holds against both shakedowns
+- Site live at `lynx.<root>` with TLS
+
+Until then, this file is the v1.2 contract.
