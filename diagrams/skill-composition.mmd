@@ -1,0 +1,13 @@
+flowchart TD
+    A["/lynx:audit invoked"] --> B{Scope?}
+    B -->|full sweep| C["full-ui-experience-audit skill"]
+    B -->|single screen| D["ui-experience-audit skill"]
+    C --> E["agent-browser MCP\ncaptures screenshots + a11y tree"]
+    D --> E
+    E --> F["Per-screen evidence written\ne2e-evidence/run-id/screen-N/"]
+    F --> G["verdict-writer agent\nreads all screen evidence"]
+    G --> H["run-verdict.md\nPASS / FAIL / CONDITIONAL"]
+    H --> I{Overall verdict}
+    I -->|PASS| J["Ship gate cleared"]
+    I -->|FAIL| K["Fix loop triggered\nmax 3 attempts per screen"]
+    K --> D

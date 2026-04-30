@@ -1,0 +1,13 @@
+flowchart LR
+    A["Audit run triggered\n/lynx:audit"] --> B["e2e-evidence/run-id/"]
+    B --> C["screen-1/\nstep-01-load.png\nstep-02-a11y.json\nstep-03-errors.txt\nscreen-1-verdict.md"]
+    B --> D["screen-2/\nstep-01-load.png\nstep-02-a11y.json\nstep-03-errors.txt\nscreen-2-verdict.md"]
+    B --> E["screen-N/\n..."]
+    C --> F["verdict-writer agent"]
+    D --> F
+    E --> F
+    F --> G["run-verdict.md\nPASS | FAIL | CONDITIONAL\ncites specific evidence paths"]
+    G --> H{Ship decision}
+    H -->|PASS| I["evidence-cleanup.sh\nprunes intermediates after TTL"]
+    H -->|FAIL| J["Fix loop\npreserves all FAIL evidence"]
+    J --> A

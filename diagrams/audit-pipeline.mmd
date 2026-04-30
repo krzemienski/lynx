@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor User
+    participant Lynx as Lynx Skill<br/>(/lynx:audit)
+    participant Browser as agent-browser MCP
+    participant VW as verdict-writer agent
+    participant FS as Filesystem<br/>(e2e-evidence/)
+
+    User->>Lynx: /lynx:audit [scope]
+    Lynx->>Browser: navigate to screen URL
+    Browser->>FS: screenshot step-01-load.png
+    Lynx->>Browser: capture a11y tree snapshot
+    Browser->>FS: snapshot step-02-a11y.json
+    Lynx->>Browser: check console errors
+    Browser->>FS: console step-03-errors.txt
+    Lynx->>Browser: interact (tap, scroll, form)
+    Browser->>FS: screenshot step-04-interaction.png
+    Lynx->>FS: write screen-verdict.md (PASS/FAIL per criterion)
+    loop next screen
+        Lynx->>Browser: navigate to next screen
+        Browser->>FS: evidence files for screen N
+        Lynx->>FS: screen-N-verdict.md
+    end
+    Lynx->>VW: all screens complete — synthesize
+    VW->>FS: read all screen-*-verdict.md
+    VW->>FS: write run-verdict.md
+    VW->>User: final PASS / FAIL / CONDITIONAL verdict
