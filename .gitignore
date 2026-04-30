@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Crucible / runtime tool state — regenerable, not shipped with plugin
+evidence/
+e2e-evidence/
+.crucible/
+.planning/
+.omc/
+.anneal/
+REFUSAL.md
+
+# Editor / OS
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Node (root-level only; site/ has its own .gitignore for node_modules + dist + .astro)
+/node_modules/
+npm-debug.log*
+
+# Logs
+*.log
