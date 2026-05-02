@@ -1,6 +1,6 @@
 # Lynx
 
-> Sharp-eyed visual-audit suite for Claude Code. Two coupled skills find UI/UX defects through real-system probes — contrast failures, false affordances, modal opacity, latent contract mismatches. No mocks. No test files. Evidence-cited verdicts. **9/9 detection accuracy on a known-mole synthetic.**
+> Sharp-eyed visual-audit suite for Claude Code. Two coupled skills find UI/UX defects through real-system probes — contrast failures, false affordances, modal opacity, latent contract mismatches. No mocks. No test files. Evidence-cited verdicts. **14/14 detection accuracy across two synthetic shakedowns (WAM 9/9 + synth-2 5/5).**
 
 A lynx sees what humans miss — high-acuity, low-light, motion-locked. This plugin gives Claude Code the same eye for UI defects: pre-attentive saliency, perceptual outliers, latent regressions that only surface after a fix unmasks them.
 
@@ -80,7 +80,7 @@ Lynx refuses to declare PASS without cited evidence. Threshold relaxations are f
 
 ## Empirical detection accuracy
 
-Real-target shakedown against a Whac-A-Mole synthetic (8 distinct mole IDs across 19 grep-marker comments):
+Real-target shakedown corpus — combined **14/14 detection (WAM 9/9 + synth-2 5/5)**. The WAM section below documents the entangled-fix synthetic specifically:
 
 | Skill | HIT | MISS | FALSE-POSITIVE | Detection |
 |---|---|---|---|---|

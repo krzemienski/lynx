@@ -15,7 +15,7 @@ Hi davepoon — submitting **lynx** for community marketplace inclusion.
 - `full-ui-experience-audit` — app-wide audit-and-remediate loop (3-cycle convergence, critical-high threshold)
 - `ui-experience-audit` — per-screen deep audit (5-phase: triage → visual → interactive → content → heuristics)
 
-**Track record:** 9/9 defect detection on a known-mole synthetic with entangled fixes (cycle-1 fix unmasks cycle-2 mole). 26/26 strict bundle PASS.
+**Track record:** 14/14 defect detection across two synthetic shakedowns (WAM 9/9 entangled-fix corpus + synth-2 5/5 independent-defects corpus). 26/26 strict bundle PASS.
 
 **Standards covered:** WCAG 2.2 AA + APCA Lc ≥ 60, Nielsen's 10 heuristics, native iOS HIG, web protocol with response-shape contract validation.
 
@@ -30,7 +30,7 @@ If accepted, the plugin entry to drop into `marketplace.json` is below.
 ```json
 {
   "name": "lynx",
-  "description": "Sharp-eyed visual-audit suite for Claude Code — two coupled skills find UI/UX defects through real-system probes (contrast failures, false affordances, modal opacity, latent contract mismatches). No mocks, no test files, evidence-cited verdicts. 9/9 detection accuracy on a known-mole synthetic.",
+  "description": "Sharp-eyed visual-audit suite for Claude Code — two coupled skills find UI/UX defects through real-system probes (contrast failures, false affordances, modal opacity, latent contract mismatches). No mocks, no test files, evidence-cited verdicts. 14/14 detection accuracy across two synthetic shakedowns (WAM 9/9 + synth-2 5/5).",
   "version": "1.0.0",
   "author": {
     "name": "Nick Krzemienski",

@@ -8,17 +8,24 @@
 
 <h1 align="center">lynx</h1>
 
+> Sharp-eyed visual-audit suite for Claude Code — two coupled skills find UI/UX defects through real browser sessions, with evidence-cited PASS/FAIL/CONDITIONAL verdicts.
+
+Live site: [withagents.dev/lynx](https://withagents.dev/lynx)
+Field journal entry: _(coming)_
+
+---
+
 <p align="center">
   <strong>sharp-eyed visual-audit suite for Claude Code</strong><br>
   <a href="https://github.com/krzemienski/lynx/releases/tag/v1.0.0"><img src="https://img.shields.io/badge/release-v1.0.0-d4af37" alt="v1.0.0"></a>
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
-  <img src="https://img.shields.io/badge/detection-9%2F9-d4af37" alt="9/9 detection">
+  <img src="https://img.shields.io/badge/detection-14%2F14-d4af37" alt="14/14 detection">
   <img src="https://img.shields.io/badge/strict_bundle-26%2F26-success" alt="26/26 strict">
 </p>
 
 ---
 
-> Two coupled skills find UI/UX defects through real-system probes — contrast failures, false affordances, modal opacity, latent contract mismatches. No mocks. No test files. Evidence-cited verdicts. **9/9 detection accuracy on a known-mole synthetic.**
+> Two coupled skills find UI/UX defects through real-system probes — contrast failures, false affordances, modal opacity, latent contract mismatches. No mocks. No test files. Evidence-cited verdicts. **14/14 detection accuracy across two synthetic shakedowns (WAM 9/9 + synth-2 5/5).**
 
 A lynx sees what humans miss — high-acuity, low-light, motion-locked. This plugin gives Claude Code the same eye for UI defects: pre-attentive saliency, perceptual outliers, latent regressions that only surface after a fix unmasks them.
 

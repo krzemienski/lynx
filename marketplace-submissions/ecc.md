@@ -17,7 +17,7 @@ Hi Affaan — ECC's depth (38 agents, 156 skills) is the gold standard, and I'd 
 **Why cross-listing:** ECC's TDD/security/code-review hooks would chain naturally with lynx's UI-side audit. ECC users finishing a feature could trigger `lynx → fix-loop` as the visual-experience gate before security/TDD passes.
 
 **Track record:**
-- 9/9 detection accuracy on a known-mole synthetic (entangled fixes — cycle-1 fix unmasks cycle-2 mole)
+- 14/14 detection accuracy across two synthetic shakedowns: WAM 9/9 (entangled fixes — cycle-1 fix unmasks cycle-2 mole) + synth-2 5/5 (independent defects)
 - 26/26 strict bundle PASS
 - Iron Rule: zero mocks, zero test files
 - Standards: WCAG 2.2 AA + APCA Lc ≥ 60, Nielsen's 10 heuristics, iOS HIG, response-shape contract validation
@@ -32,7 +32,7 @@ If cross-listing fits ECC's curation model, here's a plugin entry shaped for ECC
 {
   "name": "lynx",
   "source": "https://github.com/krzemienski/lynx",
-  "description": "Two-skill UI/UX audit suite — app-wide and per-screen deep audits. Real-system validation, no mocks, evidence-cited verdicts. 9/9 detection on known-mole synthetic.",
+  "description": "Two-skill UI/UX audit suite — app-wide and per-screen deep audits. Real-system validation, no mocks, evidence-cited verdicts. 14/14 detection across two synthetic shakedowns (WAM 9/9 + synth-2 5/5).",
   "version": "1.0.0",
   "author": {
     "name": "Nick Krzemienski"
